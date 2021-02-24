@@ -239,10 +239,10 @@ class NMT_AttentionImagine_Seq2Seq_Beam_V11(nn.Module):
         nk_mask = torch.arange(batch_size*beam_size).long() #[0:batch_size*beam_size]
         if use_cuda:
             nk_mask = nk_mask.cuda()
-        pdxs_mask = (nk_mask/beam_size)*beam_size
+        pdxs_mask = (nk_mask//beam_size)*beam_size
 
         #Tile indices to use in the loop to expand first dim
-        tile = nk_mask / beam_size
+        tile = nk_mask // beam_size
 
         #Define the beam
         beam = torch.zeros((max_length, batch_size, beam_size)).long()
@@ -263,13 +263,13 @@ class NMT_AttentionImagine_Seq2Seq_Beam_V11(nn.Module):
                 beam[0] = topk
             else:
                 cur_tokens = beam[di-1].view(-1) #Get the input tokens to the next step
-                fini_idxs = (cur_tokens == EOS_token).nonzero() #The index that checks whether the beam has terminated
+                fini_idxs = (cur_tokens == EOS_token).nonzero(as_tuple=False) #The index that checks whether the beam has terminated
                 n_fini = fini_idxs.numel() #Verify if all the beams are terminated
                 if n_fini == batch_size*beam_size:
                     break
 
                 #Get the decoder for the next iteration(batch_size*beam_size,1)
-                decoder_input = Variable(cur_tokens,volatile=True)
+                decoder_input = Variable(cur_tokens) # ,volatile=True)
                 decoder_hidden = decoder_hidden[:,tile,:] #This operation will create a decoder_hidden states with size [batch_size*beam_size,H]
                 
                 decoder_output,decoder_hidden = self.decoder(decoder_input, decoder_hidden,encoder_outputs_di, ctx_mask=context_mask_di)
@@ -300,7 +300,7 @@ class NMT_AttentionImagine_Seq2Seq_Beam_V11(nn.Module):
                 nll,idxs = nll.topk(beam_size,sorted=False) #nll, idxs have the size [batch_size,beam_size]
 
                 #previous indices into the beam and current token indices
-                pdxs = idxs / n_vocab #size is [batch_size,beam_size]
+                pdxs = idxs // n_vocab #size is [batch_size,beam_size]
 
                 #Update the previous token in beam[di]
                 beam[di] = idxs % n_vocab

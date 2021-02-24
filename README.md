@@ -44,3 +44,20 @@ __Last Updated: 9/17/2018__
 ### To be Added 
 1. Introduction on how to prepare your own dataset to train the model
 2. Create the script to generate full automatic evaluation results.
+
+## Test run instructions
+
+## To install
+```
+conda create -n torchmmt anaconda
+conda install pytorch torchvision torchaudio cudatoolkit=11.0 -c pytorch
+conda activate torchmmt
+```
+
+Download pre-processed Multi30K data from [here](https://drive.google.com/drive/folders/1G645SexvhMsLPJhPAPBjc4FnNF7v3N6w?usp=sharing).
+Download METEOR paraphrase files from [here](https://github.com/cmu-mtlab/meteor/tree/master/data) and copy into the machine_translation_vision/meteor/data directory.
+
+## To run
+```
+python Visual-Attention-Grounding-MMT/nmt_multimodal_beam_DE.py --data_path data/Multi30K_DE --trained_model_path model_VAG-NMT_multi30k_de --batch_size 2048 --eval_batch_size 512 --embedding_size 4 --hidden_size 8 --shared_embedding_size 8 --n_epochs 4 --eval_every 8 --print_every 8 --save_every 8 --sr en --tg de
+```

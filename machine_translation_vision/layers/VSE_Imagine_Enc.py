@@ -40,7 +40,7 @@ class ImagineAttn(nn.Module):
         #Create variable to store attention energies
         attn_energies = self.score(image_vec.unsqueeze(1),decoder_hidden.transpose(0,1))
         if ctx_mask is not None:
-            self.mask = (1-ctx_mask.transpose(0,1).data).byte().unsqueeze(1) #Convert the mask to the size(B*1*T)
+            self.mask = (1-ctx_mask.transpose(0,1).data).bool().unsqueeze(1) #Convert the mask to the size(B*1*T)
             attn_energies.data.masked_fill_(self.mask,-float('inf'))
         #Normalize energies to weights in range 0 to 1, resize to B x 1 x T
         return F.softmax(attn_energies,dim=-1)

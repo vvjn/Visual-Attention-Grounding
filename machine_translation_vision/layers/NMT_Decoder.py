@@ -39,7 +39,7 @@ class BahdanauAttn(nn.Module):
         encoder_outputs = encoder_outputs.transpose(0,1) # [B*T*H]
         attn_energies = self.score(H,encoder_outputs) # compute attention score
         if ctx_mask is not None:
-            self.mask = (1-ctx_mask.transpose(0,1).data).byte()
+            self.mask = (1-ctx_mask.transpose(0,1).data).bool()
             attn_energies.data.masked_fill_(self.mask,-float('inf'))
         return self.softmax(attn_energies).unsqueeze(1) # normalize with softmax, attn_energies = B * 1 * T
 

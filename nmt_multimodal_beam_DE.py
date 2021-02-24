@@ -288,7 +288,7 @@ vocab_mask[0] = 0
 if use_cuda:
     vocab_mask = vocab_mask.cuda()
 
-criterion_mt = nn.NLLLoss(weight=vocab_mask,reduce=False)
+criterion_mt = nn.NLLLoss(weight=vocab_mask,reduction="none")
 #criterion_vse = nn.HingeEmbeddingLoss(margin=margin_size,size_average=False)
 if vse_loss_type == "pairwise":
   criterion_vse = PairwiseRankingLoss(margin=margin_size)
@@ -389,6 +389,7 @@ best_meteor = 0
 best_loss = 10000000
 early_stop = patience
 for epoch in range(1,n_epochs + 1):
+    print("Epoch %d" % epoch)
     for batch_x,batch_y,batch_im,batch_x_lengths,batch_y_lengths in data_generator_tl_mtv(train_data_index,train_im_feats,batch_size):
         #Run the train function
         train_loss,train_loss_mt,train_loss_vse = train_imagine_beam(batch_x,batch_y,batch_im,batch_x_lengths,imagine_model,optimizer,criterion_mt,criterion_vse,loss_w,teacher_force_ratio,clip=clip)
@@ -488,12 +489,12 @@ for epoch in range(1,n_epochs + 1):
             print("pred: {}".format(sample_output))
         
             #Save the model when it reaches the best validation loss or best BLEU score
-            if val_mt_loss_mean < best_loss:
+            if val_mt_loss_mean < best_loss or (epoch == 1 and iter_count == eval_every):
                 torch.save(imagine_model,os.path.join(trained_model_output_path,'nmt_trained_imagine_model_best_loss.pt'))
                 #update the best_loss
                 best_loss = val_mt_loss_mean
 
-            if val_bleu[0] > best_bleu:
+            if val_bleu[0] > best_bleu or (epoch == 1 and iter_count == eval_every):
                 torch.save(imagine_model,os.path.join(trained_model_output_path,'nmt_trained_imagine_model_best_BLEU.pt'))
                 #update the best_bleu score
                 best_bleu = val_bleu[0]
@@ -501,14 +502,10 @@ for epoch in range(1,n_epochs + 1):
             else:
                 early_stop -= 1
 
-
-            if val_meteor[0] > best_meteor:
+            if val_meteor[0] > best_meteor or (epoch == 1 and iter_count == eval_every):
                 torch.save(imagine_model,os.path.join(trained_model_output_path,'nmt_trained_imagine_model_best_METEOR.pt'))
                 #update the best_bleu score
                 best_meteor = val_meteor[0]
-
-              
-
 
             #Print out the best loss and best BLEU so far
             print("Current Early_Stop Counting: {}".format(early_stop))
@@ -524,6 +521,7 @@ for epoch in range(1,n_epochs + 1):
         iter_count += 1
     
     if early_stop == 0:
+        print("Early stopping.")
         break
 
 print("Training is done.")

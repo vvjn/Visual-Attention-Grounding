@@ -32,7 +32,6 @@ EOS_token = 3
 UNK_token = 1
 MAX_LENGTH = 80 #We will abandon any sentence that is longer than this length
 
-
 use_cuda = torch.cuda.is_available()
 print("Whether GPU is available: {}".format(use_cuda))
 
@@ -111,12 +110,13 @@ def save_plot_compare(point_1, point_2,label_1,label_2,x_axis, save_path, y_labe
 #############################################################Load the Dataset#######################################################
 data_path = ARGS.data_path
 trained_model_output_path = ARGS.trained_model_path
-#trained_model_output_path = '/home/zmykevin/Kevin/Research/machine_translation_vision/trained_model/WMT17'
 source_language = ARGS.sr
 target_language = ARGS.tg
+
 BPE_dataset_suffix = '.norm.tok.lc.10000bpe'
 dataset_suffix = '.norm.tok.lc'
 dataset_im_suffix = '.norm.tok.lc.10000bpe_ims'
+
 #Initilalize a Meteor Scorer
 Meteor_Scorer = Meteor(target_language)
 
@@ -178,7 +178,7 @@ vocab_target = load_data(os.path.join(data_path,'vocab.'+target_language))
 s_word2id, s_id2word = construct_vocab_dic(vocab_source)
 t_word2id, t_id2word = construct_vocab_dic(vocab_target)
 
-print("The vocabulary size for soruce language: {}".format(len(s_word2id)))
+print("The vocabulary size for source language: {}".format(len(s_word2id)))
 print("The vocabulary size for target language: {}".format(len(t_word2id)))
 
 #Generate Train, Val and Test Indexes pairs

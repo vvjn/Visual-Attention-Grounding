@@ -9,31 +9,45 @@ from bleu import *
 import os
 from machine_translation_vision.utils import im_retrieval_eval
 from machine_translation_vision.meteor.meteor import Meteor
+import argparse
 
-use_cuda = torch.cuda.is_available()
 SOS_token = 2
 EOS_token = 3
 UNK_token = 1
 MAX_LENGTH = 80
-batch_size = 32
-eval_batch_size = 16
-beam_size = 12
-#shared_embedding_size = 512
+
+use_cuda = torch.cuda.is_available()
+print("Whether GPU is available: {}".format(use_cuda))
 
 ######################User Defined Area#########################
 # data_path = '/directory/of/data' #Define the Directory of the Test Data Path
 # source_language = 'en'
 # target_language = 'fr'
-# vocab_path = '/directory/of/vocab' #Define the Directory of the vocabulary file
 # model_path = "/path/to/model" #The full path to the trained model that you want to test on
 # output_path = "/path/to/save/prediction" #Directory to save the translation results from a trained model
 
-data_path = '/home/zmykevin/Kevin/Research/machine_translation_vision/data/Multi30K_DE_BPE_Kevin' #Define the Directory of the Test Data Path
-source_language = 'en'
-target_language = 'de'
-vocab_path = '/home/zmykevin/Kevin/Research/machine_translation_vision/data/Multi30K_DE_BPE_Kevin' #Define the Directory of the vocabulary file
-model_path = "/home/zmykevin/Kevin/Research/machine_translation_vision/trained_model/WMT17/test/nmt_trained_imagine_model_best_BLEU.pt" #The full path to the trained model that you want to test on
-output_path = "/home/zmykevin/Kevin/Research/machine_translation_vision/trained_model/WMT17/test" #Directory to save the translation results from a trained model
+PARSER = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+PARSER.add_argument('--data_path',required=True, help='path to multimodal machine translation dataset')
+PARSER.add_argument('--trained_model_file',required=True, help='path to trained model file')
+PARSER.add_argument('--sr',type=str,required=True,help='the source language')
+PARSER.add_argument('--tg',type=str,required=True, help='the target language')
+PARSER.add_argument('--output_path',type=str,required=True,help='directory to save translation results from a trained model')
+
+PARSER.add_argument('--batch_size',type=int, default=32, help='batch size during generation of corresponding text and image features')
+PARSER.add_argument('--eval_batch_size',type=int, default=16, help='batch size during evaluation')
+PARSER.add_argument('--beam_size',type=int, default=12, help='The beam size for beam search')
+
+ARGS = PARSER.parse_args()
+
+data_path = ARGS.data_path
+source_language = ARGS.sr
+target_language = ARGS.tg
+model_path = ARGS.trained_model_file
+output_path = ARGS.output_path
+
+batch_size = ARGS.batch_size
+eval_batch_size = ARGS.eval_batch_size
+beam_size = ARGS.beam_size
 ################################################################
 
 BPE_dataset_suffix = '.norm.tok.lc.10000bpe'
@@ -72,15 +86,14 @@ print("The size of Test Data after filtering: {}".format(len(test_data)))
 
 
 #Load the Vocabulary File and Create Word2Id and Id2Word dictionaries for translation
-vocab_source = load_data(os.path.join(vocab_path,'vocab.'+source_language))
-vocab_target = load_data(os.path.join(vocab_path,'vocab.'+target_language))
-
+vocab_source = load_data(os.path.join(data_path,'vocab.'+source_language))
+vocab_target = load_data(os.path.join(data_path,'vocab.'+target_language))
 
 #Construct the source_word2id, source_id2word, target_word2id, target_id2word dictionaries
 s_word2id, s_id2word = construct_vocab_dic(vocab_source)
 t_word2id, t_id2word = construct_vocab_dic(vocab_target)
 
-print("The vocabulary size for soruce language: {}".format(len(s_word2id)))
+print("The vocabulary size for source language: {}".format(len(s_word2id)))
 print("The vocabulary size for target language: {}".format(len(t_word2id)))
 
 #Generate Train, Val and Test Indexes pairs

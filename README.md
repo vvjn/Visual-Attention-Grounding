@@ -9,16 +9,15 @@ We introduce a novel multimodal machine translation model that utilizes parallel
 ![An Overview of the Visual Attention NMT](https://github.com/zmykevin/A-Visual-Attention-Grounding-Neural-Model/blob/master/AGV-NMT.jpg)
 
 ## 2. Prerequisite
-The code is partially tested on OpenSUSE Leap 15.2 with NVIDIA GPUs and [Conda](https://conda.io/miniconda.html) is expected as prerequisite. While we haven't tested this code with other OS system, we expect it can be run on any Linux Based OS with a minor adjustment. 
+The code is partly tested on OpenSUSE Leap 15.2 with NVIDIA GPUs, Python 3.8.8, and [PyPI](https://pypi.org/). While we haven't tested this code with other OS system, we expect it can be run on any Linux Based OS with a minor adjustment. 
 
-In summary, to install:
+Requirements are PyTorch, NLTK, and Matplotlib.
+It is recommended to create a new virtual environment (e.g., using [pyenv](https://github.com/pyenv/pyenv) and [pipenv](https://pipenv.pypa.io/)) to run this code.
+To install the requirements, clone this repository, then run:
 ```
-conda create -n torch_mmt anaconda
-conda install pytorch torchvision torchaudio cudatoolkit=11.0 -c pytorch
-conda activate torch_mmt
+pip install -r requirements.txt
 ```
-You can change the CUDA version from 11.0 to the 10.1 or 10.2 as supported by your GPU drivers.
-Clone this repository.
+
 Download pre-processed Multi30K data from [here](https://drive.google.com/drive/folders/1G645SexvhMsLPJhPAPBjc4FnNF7v3N6w?usp=sharing).
 Download METEOR paraphrase files from [here](https://github.com/cmu-mtlab/meteor/tree/master/data) and copy into the machine_translation_vision/meteor/data directory.
 
@@ -50,21 +49,7 @@ Testing:
 python Visual-Attention-Grounding-MMT/test_multimodal.py --data_path data/Multi30K_DE --trained_model_file model_VAG-NMT_multi30k_de/nmt_trained_imagine_model_best_BLEU.pt --batch_size 32 --eval_batch_size 16 --sr en --tg de --output_path results_model_VAG-NMT_multi30k_de_1
 ```
 
-## 4. Command to run with tiny model
-
-These commands are to verify that the code runs when we only have access to machines with a small amount of GPU memory.
-
-Training:
-```
-python Visual-Attention-Grounding-MMT/nmt_multimodal_beam_DE.py --data_path data/Multi30K_DE --trained_model_path model_VAG-NMT_multi30k_de --batch_size 2048 --eval_batch_size 512 --embedding_size 4 --hidden_size 8 --shared_embedding_size 8 --n_epochs 4 --eval_every 8 --print_every 8 --save_every 8 --sr en --tg de
-```
-
-Testing:
-```
-python Visual-Attention-Grounding-MMT/test_multimodal.py --data_path data/Multi30K_DE --trained_model_file model_VAG-NMT_multi30k_de/nmt_trained_imagine_model_best_BLEU.pt --batch_size 2048 --eval_batch_size 512 --sr en --tg de --output_path model_VAG-NMT_multi30k_de_results_1
-```
-
-## 5. Other information
+## 4. Other information
 
 ### IKEA Dataset
 The collected product description multimodal machine translation benchmark crawled from IKEA website is stored under the github repo [here](https://github.com/sampalomad/IKEA-Dataset)
